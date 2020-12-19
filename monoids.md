@@ -1,15 +1,17 @@
-This article will introduce an important and interesting concept in functional programming : Monoids.
+This article will introduce an important and interesting concept in functional programming: Monoids.
+The focus will be on monoids in Haskell, and some familarity with Haskell or a similar language is adviced.
 
 # What are monoids?
 
-*Monoid* is a concept that comes from abstract algebra, and is there defined as :
+*Monoid* is a concept that comes from abstract algebra, where  it is defined as :
 a set equipped with an associative binary operation and an identity element.
 
-A binary operation on a set is a function takes two arguments from the set and produces another one.
-Being associative means that the grouping of parentheses does not matter, so for a binary operation <> that means that `x <> (y <> z) === (x <> y) <> z`.
+A binary operation on a set is a function that takes two arguments from the set and produces another one.
+Being associative means that the grouping of parentheses does not matter. For a
+binary operation `<>`, that means that `x <> (y <> z) === (x <> y) <> z`.
 
-An identity element is an element of the set that follows `mempty <> x === x` and `x <> mempty === x`.
-So it is kind of an "empty" element, that is "ignored" by `<>`.
+An identity element is an element of the set where `mempty <> x === x` and `x <> mempty === x`.
+So, it is kind of an "empty" element, that is "ignored" by `<>`.
 
 
 Translated into Haskell:
@@ -17,7 +19,7 @@ Translated into Haskell:
 * binary operation ==> a function `<> :: a -> a -> a`
 * identity element ==> `mempty :: a`
 
-So implemented in Haskell it could become:
+So, implemented in Haskell it could become:
 
 ```haskell
 class Monoid a where
@@ -27,7 +29,7 @@ class Monoid a where
 
 This was how it was defined earlier, but now this class is split into two: `Semigroup` and `Monoid`.
 A semigroup is just a monoid without the identity element part, a monoid is then a semigroup with an identity.
-So now it is
+So now it is:
 
 ```haskell
 class Semigroup a where
@@ -46,7 +48,7 @@ Let us start with some basic, but common and useful monoids.
 
 ### Sum and Product
 When we want to get the sum of values, we can use `Sum`. 
-The `Sum` is a monoid for numbers where the binary operation is addition(`+`) and the identity element is `0`.
+`Sum` is a monoid for numbers where the binary operation is addition (`+`) and the identity element is `0`.
 
 
 ```haskell
@@ -98,11 +100,11 @@ To be folded just means to combine the values inside the structure, which is exa
 foldMap :: (Foldable t, Monoid m) => (a -> m) -> t a -> m
 ```
 
-What this function does is to apply the `a->m` function on every `a` in the `t a` and then combines all the resulting `m` values using `<>`
-and uses `mempty` when the foldable is empty.  
+What this function does is to apply the `a -> m` function on every `a` in the `t a` combining all the resulting `m` values using `<>`
+and uses `mempty` when the foldable is empty.
 
 This a bit abstract, so let us see some concrete examples.
-Let us first look at lists :
+Let us first look at lists:
 
 ```haskell
 instance Foldable [] where
@@ -111,7 +113,7 @@ instance Foldable [] where
 ```
 
 We can see that `foldMap f [x0,x1,x2,x3...,xn] === f x0 <> (f x1 <> (f x2 <> (f x3.... <> f xn)))`.
-But since `<>` needs to be associative these parantheses does not matter, so it is the same as : 
+But since `<>` needs to be associative, these parentheses does not matter, so it is the same as : 
 `f x0 <> f x1 <> f x2 <> f x3.... <> f xn`
 
 
@@ -148,7 +150,7 @@ foldMap (foldMap Product) [Just 2, Nothing, Just 4]
 ```
 
 
-When we dont't need to transform the values inside the `Foldable` , we can use the `fold` function.
+When we don't need to transform the values inside the `Foldable`, we can use the `fold` function.
 
 ```haskell
 fold :: (Foldable t , Monoid m) => t m -> m
@@ -167,9 +169,9 @@ fold [Sum 1, Sum 3, Sum 5]
 Now we have seen how to fold data structures using monoids, so let us take a look at some more monoid instances.
 
 
-### Any - All
+### Any and All
  
-All and Any are `Bool` newtypes for monoid instances for (&&) with mempty = True and (||) with mempty = False, respectivly.
+All and Any are `Bool` newtypes for monoid instances for `(&&)` with `mempty = True` and `(||)` with `mempty = False`, respectively.
 
 They can be use to check that any or all elements in a foldable container satisfies a predicate.
 
@@ -184,7 +186,7 @@ foldMap (All . (>2) . length) ["abc","xs"]
 
 Bool can also be made into a monoid using the `xor`-operation.
 
-## Min Max
+## Min and Max
 
 When we want to find the maximal value, we can use the `Max` monoid.
 
@@ -226,7 +228,7 @@ mempty :: Max Int
 > Max {getMax = -9223372036854775808}
 ```
 
-This means that if we fold an empty container, we get a value which is confusing in some cases.
+This means that if we fold an empty container, we get a value which may be confusing in some cases.
 
 ```haskell
 fold [] :: Min Int
@@ -238,9 +240,8 @@ Instead we sometimes want to represent this "failure" using Maybe.
 
 ## Lifting a Semigroup into a Monoid
 
-If we take a look at the Maybe data type : `data Maybe a = Nothing | Just a`.
-
-We can see that it can represent a set of values (`Just a`) with an additional element `Nothing`.
+If we take a look at the Maybe data type: `data Maybe a = Nothing | Just a`,
+we can see that it can represent a set of values (`Just a`) with an additional element `Nothing`.
 
 If the `a`'s are monoids, we can combine them using `<>` and then chose `Nothing` as our identity element.
 In other words, we embeded a semigroup in a monoid by adjoining an identity.
@@ -273,7 +274,7 @@ foldMap (Just . First) [1,2,3]
 ```
 
 Back to our "problem" with the min/max identity elements:
-If we now wrap up our type inside a `Maybe`, the result is more sensible(?)
+If we now wrap up our type inside a `Maybe`, the result is more sensible.
 ```haskell
 >fold [] :: Maybe (Min Int)
 Nothing
@@ -294,13 +295,13 @@ foldMap (\x -> [x,x*2]) [1,2,3]
 ```
 
 In fact, the list is an important monoid, called the free monoid.
-This comes from the fact that if you take the requirements for a monoid and create the minimal strcuture needed to satisfy these requirements, 
+This comes from the fact that if you take the requirements for a monoid and create the minimal structure needed to satisfy these requirements, 
 you end up with list monoid instance.
 
 
 ### Tuples
-A very nice neat property about monoids is that they compose over products.
-Which in practice means, that if you have two monoids, you can put combine them in a tuple and then that tuple is also a monoid.
+A very neat property about monoids is that they compose over products.
+Which in practice means, that if you have two monoids, you can combine them in a tuple, and then that tuple is also a monoid.
 
 ```haskell
 instance (Monoid a, Monoid b) => Monoid (a,b) where
@@ -313,10 +314,10 @@ instance (Monoid a, Monoid b) => Monoid (a,b) where
 > ("abcabc", Sum 3)
 ```
 
-(This also implemented for tuples of size 3,4 and 5)
+(This is also implemented for tuples of size 3,4 and 5)
 
 This makes it easy to accumulate multiple monoid values in a single fold.
-We can use this to find the minimum,maximum,length,sum and product of a list, all in one pass in a neat way. 
+We can use this to find the minimum, maximum, length, sum and product of a list, all in one pass in a neat way.
 
 ```haskell
 foldMap (\x -> (Min x, Max x, Sum 1, Sum x, Product x)) [5,1,3]
@@ -324,8 +325,8 @@ foldMap (\x -> (Min x, Max x, Sum 1, Sum x, Product x)) [5,1,3]
 ```
 
 And for another example:
-Let us say that we have a list of (x,y) coordinates and want to find, the bottom
-left and top right corner, i.e. (min x, min y) and (max x, max y)
+Let us say that we have a list of x y coordinates and want to find, the bottom
+left and top right corner, i.e. (min x, min y) and (max x, max y).
 
 
 ```haskell
@@ -362,7 +363,7 @@ Ap {getAp = Nothing}
 ```
 
 As we have seen earlier, in the regular Maybe monoid, `Nothing` is the identity element.
-But we know that the applicative instance for maybe short circuits when you encounter `Nothing`.
+Moreover, the applicative instance for maybe short circuits when you encounter `Nothing
 Because the monoid instance for `Ap Maybe` inherits this behaviour, the second example ends up being `Nothing`, 
 but in the first example the `Nothing` is "ignored".
 
@@ -389,7 +390,7 @@ Map.fromList [(0,"abc"),(1,"xyz")] <> Map.fromList [(1,"www"),(2,"q")]
 > Map.fromList [(0,"abc"),(1,"xyz"),(2,"q")]
 ```
 
-As we can see, the Map monoid instance only keeps the values from the left map when encountering dupliacate keys.
+As we can see, the Map monoid instance only keeps the values from the left map when encountering duplicate keys.
 Often we would like to combine the values instead.
 One alternative in this case is to use `Map.unionsWith` instead of `<>`
 
@@ -406,12 +407,10 @@ AppendMap (Map.fromList [(0,"abc"),(1,"xyz")]) <>  AppendMap (Map.fromList [(1,"
 > AppendMap Map.fromList [(0,"abc"),(1,"xyzwww"),(2,"q")]
 ```
 
-# Summary
+# 
 
-We have now looked at different Semigroups and Monoids how they are useful when working with Foldable containers.
-Hopefully you learned something new or something became clearer than it was before.
 ```haskell
-foldMap fold [Just "Merry", Nothing, Just " ", Nothing ,Just "Christmas"] <> "!"
-> "Merry Christmas!"`
+foldMap fold [Just "Merry", Nothing, Just " Monoidal ", Nothing ,Just "Christmas"] <> "!"
+> "Merry Monoidal Christmas!"`
 ```
 
