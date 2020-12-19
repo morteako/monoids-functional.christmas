@@ -1,4 +1,4 @@
-# MONOIDS
+# Monoids in Haskell
 
 # What are monoids?
 
