@@ -6,7 +6,7 @@ This article will introduce an important and interesting concept in functional p
 a set equipped with an associative binary operation and an identity element.
 
 A binary operation on a set is a function takes two arguments from the set and produces another one.
-Being associative means that the grouping of parentheses does not matter, so for a binary operation <> that means that `x <> (y <> z) (x <> y) <> z`.
+Being associative means that the grouping of parentheses does not matter, so for a binary operation <> that means that `x <> (y <> z) === (x <> y) <> z`.
 
 An identity element is an element of the set that follows `mempty <> x === x` and `x <> mempty === x`.
 So it is kind of an "empty" element, that is "ignored" by `<>`.
@@ -37,7 +37,7 @@ class Semigroup a => Monoid a where
     mempty :: a
 ```
 
-
+(When I refer to a "monoid instance" later in the article, I mean both the semigroup and monoid instance for a type, not just the monoid instance).
 
 
 ## Basic Monoids
@@ -66,6 +66,8 @@ mempty :: Sum Int
 
 ```
 
+
+
 If we instead want to multiply values we can use `Product`.
 Here the binary operation is multiplication (`*`) and the identity element is `1`.
 
@@ -83,11 +85,13 @@ Product 4 <> Product 5 <> mempty
 > Product 20
 ```
 
+
+
 But how do we use this on multiple values, like combining all the elements in a list using `<>`?
 
 ## Foldable
 
-Haskell has a type class for data structures that can be folded, called `Foldable`.
+Haskell has a type class for data structures that can be folded, called [Foldable](https://hackage.haskell.org/package/base-4.14.1.0/docs/Data-Foldable.html#t:Foldable).
 To be folded just means to combine the values inside the structure, which is exactly what we want to do when using monoids.
 
 ```haskell
@@ -182,7 +186,7 @@ Bool can also be made into a monoid using the `xor`-operation.
 
 ## Min Max
 
-When we want to find the maximum of values of values, we can use the `Max` monoid.
+When we want to find the maximal value, we can use the `Max` monoid.
 
 ```haskell
 newtype Max a = Max { getMax :: a }
@@ -320,8 +324,8 @@ foldMap (\x -> (Min x, Max x, Sum 1, Sum x, Product x)) [5,1,3]
 ```
 
 And for another example:
-Let us say that we have a list of x y coordinates and want to find AVGRENNSENDE OMRÅDET, the bottom left and top right corner.
-namely min x, min y and max x, max y
+Let us say that we have a list of (x,y) coordinates and want to find, the bottom
+left and top right corner, i.e. (min x, min y) and (max x, max y)
 
 
 ```haskell
