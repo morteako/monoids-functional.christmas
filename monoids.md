@@ -1,5 +1,5 @@
 This article will introduce an important and interesting concept in functional programming: Monoids.
-The focus will be on monoids in Haskell, and some familarity with Haskell or a similar language is adviced.
+The focus will be on monoids in Haskell.
 
 # What are monoids?
 
@@ -363,7 +363,7 @@ Ap {getAp = Nothing}
 ```
 
 As we have seen earlier, in the regular Maybe monoid, `Nothing` is the identity element.
-Moreover, the applicative instance for maybe short circuits when you encounter `Nothing
+Moreover, the applicative instance for maybe short circuits when you encounter `Nothing`.
 Because the monoid instance for `Ap Maybe` inherits this behaviour, the second example ends up being `Nothing`, 
 but in the first example the `Nothing` is "ignored".
 
